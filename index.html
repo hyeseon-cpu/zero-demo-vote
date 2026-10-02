@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Zero Demo Day 투표 | GDGoC KNU</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #F8F9FA;
+    --surface: #FFFFFF;
+    --ink: #202124;
+    --ink-2: #5F6368;
+    --line: #DADCE0;
+    --blue: #4285F4;
+    --red: #EA4335;
+    --yellow: #FBBC04;
+    --green: #34A853;
+    --done-bg: #E6F4EA;
+    --done-ink: #137333;
+    --disabled-bg: #E8EAED;
+    --disabled-ink: #80868B;
+    --bar-bg: rgba(255,255,255,0.94);
+    box-sizing: border-box;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #202124; --surface: #2B2C2F; --ink: #E8EAED; --ink-2: #9AA0A6; --line: #3C4043;
+      --done-bg: #1E3A2A; --done-ink: #81C995; --disabled-bg: #3C4043; --disabled-ink: #9AA0A6;
+      --bar-bg: rgba(32,33,36,0.94);
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #202124; --surface: #2B2C2F; --ink: #E8EAED; --ink-2: #9AA0A6; --line: #3C4043;
+    --done-bg: #1E3A2A; --done-ink: #81C995; --disabled-bg: #3C4043; --disabled-ink: #9AA0A6;
+    --bar-bg: rgba(32,33,36,0.94);
+  }
+  *, *::before, *::after { box-sizing: border-box; }
+  html { scroll-padding-top: env(safe-area-inset-top, 0px); }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font-family: "Noto Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
+    line-height: 1.6; -webkit-font-smoothing: antialiased;
+  }
+  img { max-width: 100%; display: block; }
+  .wrap { max-width: 1040px; margin: 0 auto; padding: 32px 20px 160px; }
+
+  /* Header */
+  .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 15px; color: var(--ink-2); }
+  .dots { display: flex; gap: 5px; }
+  .dots i { width: 10px; height: 10px; border-radius: 50%; display: block; }
+  h1 { font-size: clamp(30px, 6vw, 46px); line-height: 1.2; font-weight: 900; letter-spacing: -0.02em; margin: 18px 0 12px; }
+  .lead { font-size: 16px; color: var(--ink-2); margin: 0; max-width: 36em; }
+  .steps { display: flex; flex-wrap: wrap; gap: 8px 20px; margin: 22px 0 0; padding: 0; list-style: none; font-size: 14px; color: var(--ink-2); counter-reset: s; }
+  .steps li { counter-increment: s; display: flex; align-items: center; gap: 8px; }
+  .steps li::before { content: counter(s); width: 22px; height: 22px; border-radius: 50%; border: 1.5px solid var(--line); display: grid; place-items: center; font-size: 12px; font-weight: 700; color: var(--ink); }
+
+  /* Cards */
+  .grid { display: grid; grid-template-columns: 1fr; gap: 20px; margin-top: 32px; }
+  @media (min-width: 820px) { .grid { grid-template-columns: 1fr 1fr; gap: 24px; } }
+  .card {
+    background: var(--surface); border: 1px solid var(--line); border-radius: 20px; overflow: hidden;
+    display: flex; flex-direction: column; position: relative;
+    transition: border-color .25s ease;
+  }
+  .card::before { content: ""; position: absolute; inset: 0 0 auto 0; height: 5px; background: var(--accent); }
+  .card.done { border-color: var(--accent); }
+  .thumb { aspect-ratio: 16 / 9; background: color-mix(in srgb, var(--accent) 12%, var(--surface)); display: grid; place-items: center; overflow: hidden; }
+  .thumb img, .thumb svg { width: 100%; height: 100%; object-fit: cover; }
+  .body { padding: 22px 22px 24px; display: flex; flex-direction: column; gap: 16px; flex: 1; }
+  .top { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+  .name { font-size: 22px; font-weight: 900; margin: 0; letter-spacing: -0.01em; line-height: 1.3; }
+  .team { font-size: 13px; color: var(--ink-2); margin: 2px 0 0; }
+  .chip { flex-shrink: 0; font-size: 12px; font-weight: 700; padding: 5px 10px; border-radius: 999px; background: var(--disabled-bg); color: var(--disabled-ink); white-space: nowrap; }
+  .card.done .chip { background: var(--done-bg); color: var(--done-ink); }
+  .oneline { font-size: 15px; margin: 0; }
+
+  .ba { display: grid; grid-template-columns: 1fr; border: 1px solid var(--line); border-radius: 14px; overflow: hidden; }
+  .ba > div { padding: 12px 14px; }
+  .ba > div + div { border-top: 1px solid var(--line); background: color-mix(in srgb, var(--accent) 7%, transparent); }
+  .ba dt { font-size: 12px; font-weight: 700; color: var(--ink-2); margin-bottom: 2px; }
+  .ba dd { margin: 0; font-size: 14px; }
+  .ba > div + div dt { color: var(--accent-ink); }
+
+  .feature h3 { font-size: 13px; font-weight: 700; color: var(--ink-2); margin: 0 0 4px; }
+  .feature p { margin: 0; font-size: 15px; font-weight: 500; }
+  .mission { font-size: 14px; padding: 12px 14px; border-radius: 12px; background: var(--bg); margin: 0; }
+  .mission b { font-weight: 700; }
+
+  .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: auto; }
+  .btn {
+    appearance: none; border: 0; cursor: pointer; font: inherit; font-weight: 700; font-size: 15px;
+    min-height: 48px; padding: 0 14px; border-radius: 12px; display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    text-decoration: none; transition: transform .1s ease, background .2s ease;
+  }
+  .btn:active { transform: scale(0.98); }
+  .btn svg { width: 18px; height: 18px; flex-shrink: 0; }
+  .btn-ghost { background: transparent; color: var(--ink); border: 1.5px solid var(--line); }
+  .btn-ghost.used { border-color: var(--accent); }
+  .btn-fill { background: var(--accent); color: #fff; }
+  .btn:focus-visible, .vote:focus-visible { outline: 3px solid var(--blue); outline-offset: 2px; }
+
+  /* Bottom bar */
+  .bar {
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 10;
+    background: var(--bar-bg); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+    border-top: 1px solid var(--line);
+    padding: 14px 20px calc(14px + env(safe-area-inset-bottom, 0px));
+  }
+  .bar-in { max-width: 1040px; margin: 0 auto; display: flex; align-items: center; gap: 16px; }
+  .progress { display: flex; flex-direction: column; gap: 6px; min-width: 92px; }
+  .slots { display: flex; gap: 6px; }
+  .slot { width: 40px; height: 8px; border-radius: 4px; background: var(--disabled-bg); transition: background .3s ease; }
+  .count { font-size: 13px; color: var(--ink-2); font-weight: 500; }
+  .vote {
+    flex: 1; min-height: 54px; border-radius: 14px; border: 0; font: inherit; font-size: 16px; font-weight: 700;
+    background: var(--disabled-bg); color: var(--disabled-ink); cursor: not-allowed; padding: 0 16px;
+    transition: background .3s ease, color .3s ease;
+  }
+  .vote.ready { background: var(--blue); color: #fff; cursor: pointer; }
+  .vote.ready.pop { animation: pop .5s ease; }
+  @keyframes pop { 0%{transform:scale(1)} 40%{transform:scale(1.03)} 100%{transform:scale(1)} }
+
+  .toast {
+    position: fixed; left: 50%; bottom: calc(100px + env(safe-area-inset-bottom, 0px)); transform: translate(-50%, 12px);
+    background: var(--ink); color: var(--bg); font-size: 14px; padding: 10px 16px; border-radius: 10px;
+    opacity: 0; pointer-events: none; transition: opacity .2s ease, transform .2s ease; max-width: calc(100% - 40px); text-align: center; z-index: 20;
+  }
+  .toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+  .foot { margin-top: 28px; font-size: 13px; color: var(--ink-2); }
+  .foot button { font: inherit; color: var(--ink-2); background: none; border: 0; text-decoration: underline; cursor: pointer; padding: 0; }
+
+  @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
+  @media (max-width: 420px) { .slot { width: 30px; } .progress { min-width: 72px; } .vote { font-size: 15px; } }
+</style>
+</head>
+<body>
+<main class="wrap">
+  <div class="brand"><span class="dots"><i style="background:var(--blue)"></i><i style="background:var(--red)"></i><i style="background:var(--yellow)"></i><i style="background:var(--green)"></i></span>GDGoC KNU</div>
+  <h1>Zero Demo Day<br>People's Choice 투표</h1>
+  <p class="lead">2주 동안 만든 두 서비스를 직접 보고, 다시 써보고 싶은 서비스에 투표해주세요. 두 서비스를 모두 확인하면 투표 버튼이 열립니다.</p>
+  <ol class="steps">
+    <li>각 서비스의 시연영상을 보거나 직접 체험하기</li>
+    <li>두 서비스 모두 확인 완료</li>
+    <li>최종 투표하기</li>
+  </ol>
+
+  <section class="grid" id="grid" aria-label="투표 대상 서비스"></section>
+
+  <p class="foot">문의는 GDGoC KNU 운영진에게 남겨주세요. <button type="button" id="reset">확인 기록 초기화</button></p>
+</main>
+
+<div class="bar" role="region" aria-label="투표 진행 상황">
+  <div class="bar-in">
+    <div class="progress">
+      <div class="slots" id="slots"></div>
+      <span class="count" id="count">0 / 2 확인</span>
+    </div>
+    <button class="vote" id="vote" type="button" aria-disabled="true">두 가지 서비스를 모두 체험한 후 투표해주세요</button>
+  </div>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script src="services.js"></script>
+<script>
+const STORE_KEY = "zero-vote-v1";
+const icons = {
+  play: '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.14v13.72a1 1 0 0 0 1.5.86l11-6.86a1 1 0 0 0 0-1.72l-11-6.86A1 1 0 0 0 8 5.14z"/></svg>',
+  open: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4h6v6"/><path d="M20 4l-9 9"/><path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg>'
+};
+
+const illus = {
+  lecture: (c) => `<svg viewBox="0 0 320 180" role="img" aria-label="강의 자동재생 대표 이미지">
+    <rect x="40" y="26" width="240" height="128" rx="12" fill="${c}" opacity=".14"/>
+    <rect x="56" y="40" width="140" height="80" rx="8" fill="${c}" opacity=".9"/>
+    <path d="M118 66v28l24-14z" fill="#fff"/>
+    <rect x="56" y="132" width="140" height="6" rx="3" fill="${c}" opacity=".25"/>
+    <rect x="56" y="132" width="96" height="6" rx="3" fill="${c}"/>
+    <g fill="${c}">
+      <rect x="210" y="40" width="56" height="22" rx="5" opacity=".9"/>
+      <rect x="210" y="69" width="56" height="22" rx="5" opacity=".5"/>
+      <rect x="210" y="98" width="56" height="22" rx="5" opacity=".3"/>
+    </g>
+    <path d="M238 58v14m-5-5 5 5 5-5" stroke="#fff" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  </svg>`,
+  library: (c) => {
+    let seats = "";
+    for (let r = 0; r < 4; r++) for (let k = 0; k < 7; k++) {
+      const free = (r === 1 && k === 4) || (r === 3 && k === 1);
+      seats += `<rect x="${62 + k * 30}" y="${40 + r * 28}" width="22" height="18" rx="4" fill="${free ? c : 'currentColor'}" opacity="${free ? 1 : .18}"/>`;
+    }
+    return `<svg viewBox="0 0 320 180" role="img" aria-label="도서관 빈자리 알림 대표 이미지" style="color:var(--ink-2)">
+      ${seats}
+      <g transform="translate(232 26)">
+        <circle cx="16" cy="16" r="16" fill="${c}"/>
+        <path d="M16 8a5 5 0 0 0-5 5v4l-2 3h14l-2-3v-4a5 5 0 0 0-5-5zm-2 14a2 2 0 0 0 4 0" fill="#fff"/>
+      </g>
+    </svg>`;
+  }
+};
+
+function fallbackThumb(s) { return illus[s.id] ? illus[s.id](s.color) : ""; }
+
+function load() {
+  try { return JSON.parse(localStorage.getItem(STORE_KEY)) || null; } catch (e) { return null; }
+}
+function save(s) {
+  try { localStorage.setItem(STORE_KEY, JSON.stringify(s)); } catch (e) {}
+}
+
+let state = load();
+if (!state || !Array.isArray(state.order) || state.order.length !== SERVICES.length) {
+  const ids = SERVICES.map(s => s.id);
+  if (Math.random() < 0.5) ids.reverse();
+  state = { order: ids, viewed: {} };
+  save(state);
+}
+
+const grid = document.getElementById("grid");
+const slots = document.getElementById("slots");
+const count = document.getElementById("count");
+const vote = document.getElementById("vote");
+const toastEl = document.getElementById("toast");
+let toastTimer;
+
+function toast(msg) {
+  toastEl.textContent = msg;
+  toastEl.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => toastEl.classList.remove("show"), 2600);
+}
+
+function esc(s) { return String(s).replace(/[&<>"]/g, ch => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[ch])); }
+
+function render() {
+  const ordered = state.order.map(id => SERVICES.find(s => s.id === id));
+  grid.innerHTML = ordered.map(s => {
+    const v = state.viewed[s.id] || {};
+    const done = v.video || v.try;
+    const thumb = s.thumb && !brokenThumbs.has(s.id)
+      ? `<img src="${esc(s.thumb)}" alt="${esc(s.name)} 대표 이미지" data-thumb="${s.id}">`
+      : fallbackThumb(s);
+    return `<article class="card ${done ? "done" : ""}" style="--accent:${s.color};--accent-ink:${s.ink}" aria-labelledby="n-${s.id}">
+      <div class="thumb">${thumb}</div>
+      <div class="body">
+        <div class="top">
+          <div><h2 class="name" id="n-${s.id}">${esc(s.name)}</h2><p class="team">${esc(s.team)}</p></div>
+          <span class="chip">${done ? "확인 완료" : "아직 안 봄"}</span>
+        </div>
+        <p class="oneline">${esc(s.oneline)}</p>
+        <dl class="ba">
+          <div><dt>지금까지는</dt><dd>${esc(s.before)}</dd></div>
+          <div><dt>이 서비스를 쓰면</dt><dd>${esc(s.after)}</dd></div>
+        </dl>
+        <div class="feature"><h3>핵심 기능</h3><p>${esc(s.feature)}</p></div>
+        <p class="mission"><b>체험 미션</b> ${esc(s.mission)}</p>
+        <div class="actions">
+          <button class="btn btn-ghost ${v.video ? "used" : ""}" data-id="${s.id}" data-kind="video" type="button">${icons.play}시연영상 보기</button>
+          <button class="btn btn-fill" data-id="${s.id}" data-kind="try" type="button">${icons.open}체험해보기</button>
+        </div>
+      </div>
+    </article>`;
+  }).join("");
+
+  slots.innerHTML = ordered.map(s => {
+    const v = state.viewed[s.id] || {};
+    return `<span class="slot" style="${(v.video || v.try) ? `background:${s.color}` : ""}"></span>`;
+  }).join("");
+
+  const n = ordered.filter(s => { const v = state.viewed[s.id] || {}; return v.video || v.try; }).length;
+  count.textContent = `${n} / ${SERVICES.length} 확인`;
+  const ready = n === SERVICES.length;
+  const wasReady = vote.classList.contains("ready");
+  vote.classList.toggle("ready", ready);
+  vote.setAttribute("aria-disabled", String(!ready));
+  vote.textContent = ready ? "최종 투표하러 가기" : "두 가지 서비스를 모두 체험한 후 투표해주세요";
+  if (ready && !wasReady && render.inited) { vote.classList.remove("pop"); void vote.offsetWidth; vote.classList.add("pop"); }
+  render.inited = true;
+}
+
+// 대표 이미지 파일이 없거나 깨지면 기본 일러스트로 대체
+const brokenThumbs = new Set();
+grid.addEventListener("error", (e) => {
+  const img = e.target;
+  if (!(img instanceof HTMLImageElement) || !img.dataset.thumb) return;
+  const s = SERVICES.find(x => x.id === img.dataset.thumb);
+  brokenThumbs.add(s.id);
+  img.parentElement.innerHTML = fallbackThumb(s);
+}, true);
+
+grid.addEventListener("click", (e) => {
+  const b = e.target.closest("button[data-id]");
+  if (!b) return;
+  const s = SERVICES.find(x => x.id === b.dataset.id);
+  const kind = b.dataset.kind;
+  const url = kind === "video" ? s.videoUrl : s.tryUrl;
+  state.viewed[s.id] = Object.assign({}, state.viewed[s.id], { [kind]: true });
+  save(state);
+  if (url) {
+    window.open(url, "_blank", "noopener");
+  } else {
+    toast(`미리보기: ${s.name}의 ${kind === "video" ? "시연영상" : "체험"} 링크가 아직 연결되지 않았어요`);
+  }
+  render();
+});
+
+vote.addEventListener("click", () => {
+  if (!vote.classList.contains("ready")) {
+    toast("두 가지 서비스를 모두 확인하면 투표할 수 있어요");
+    return;
+  }
+  if (!FORM_URL) {
+    toast("미리보기: 구글 폼 링크가 아직 연결되지 않았어요");
+    return;
+  }
+  const order = state.order.map(id => SERVICES.find(s => s.id === id).name).join(" → ");
+  let url = FORM_URL;
+  if (ORDER_ENTRY) url += (url.includes("?") ? "&" : "?") + "usp=pp_url&" + ORDER_ENTRY + "=" + encodeURIComponent(order);
+  window.open(url, "_blank", "noopener");
+});
+
+document.getElementById("reset").addEventListener("click", () => {
+  state.viewed = {};
+  save(state);
+  render();
+  toast("확인 기록을 초기화했어요");
+});
+
+render();
+</script>
+</body>
+</html>
