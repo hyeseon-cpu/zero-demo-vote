@@ -135,12 +135,55 @@
   .foot { margin-top: 28px; font-size: 13px; color: var(--ink-2); }
   .foot button { font: inherit; color: var(--ink-2); background: none; border: 0; text-decoration: underline; cursor: pointer; padding: 0; }
 
+  [hidden] { display: none !important; }
+
+  /* Survey */
+  .back { font: inherit; font-size: 14px; font-weight: 500; color: var(--ink-2); background: none; border: 0; padding: 8px 0; cursor: pointer; }
+  .sv { max-width: 640px; margin: 0 auto; padding-bottom: 48px; }
+  .sv h1 { font-size: clamp(28px, 6vw, 38px); margin-top: 10px; }
+  .sv-block { background: var(--surface); border: 1px solid var(--line); border-radius: 20px; padding: 22px; margin-top: 20px; position: relative; overflow: hidden; }
+  .sv-block.svc::before { content: ""; position: absolute; inset: 0 0 auto 0; height: 5px; background: var(--accent); }
+  .sv-block h2 { font-size: 20px; font-weight: 900; margin: 0; line-height: 1.3; }
+  .sv-block .ctx { font-size: 13px; color: var(--ink-2); margin: 6px 0 0; }
+  .q { padding-top: 18px; }
+  .q + .q { border-top: 1px solid var(--line); margin-top: 18px; }
+  .sv-block > .q:first-child { padding-top: 0; }
+  .qt { font-size: 15px; font-weight: 700; margin: 0 0 10px; display: block; }
+  .qt::after { content: " *"; color: var(--red); }
+  .opts { display: flex; flex-wrap: wrap; gap: 8px; }
+  .opt { position: relative; flex: 1 1 0; min-width: 0; }
+  .opt input { position: absolute; opacity: 0; inset: 0; margin: 0; cursor: pointer; }
+  .opt span {
+    display: flex; align-items: center; justify-content: center; text-align: center; min-height: 48px; padding: 8px 10px;
+    border: 1.5px solid var(--line); border-radius: 12px; font-size: 15px; font-weight: 500; transition: border-color .15s ease, background .15s ease;
+  }
+  .opt input:checked + span { border-color: var(--accent, var(--blue)); background: color-mix(in srgb, var(--accent, var(--blue)) 12%, var(--surface)); font-weight: 700; }
+  .opt input:focus-visible + span { outline: 3px solid var(--blue); outline-offset: 2px; }
+  .scale .opt span { padding: 8px 0; }
+  .scale-ends { display: flex; justify-content: space-between; font-size: 12px; color: var(--ink-2); margin-top: 6px; }
+  .pick .opts { flex-direction: column; }
+  .pick .opt span { justify-content: flex-start; padding: 12px 16px; min-height: 56px; font-size: 16px; }
+  .pick .opt span::before { content: ""; width: 12px; height: 12px; border-radius: 50%; background: var(--c); margin-right: 10px; flex-shrink: 0; }
+  .text-in { width: 100%; min-height: 48px; padding: 10px 14px; font: inherit; font-size: 16px; color: var(--ink); background: var(--surface); border: 1.5px solid var(--line); border-radius: 12px; }
+  .text-in:focus { outline: none; border-color: var(--blue); }
+  .err { display: none; color: var(--red); font-size: 13px; font-weight: 500; margin: 8px 0 0; }
+  .q.bad .err { display: block; }
+  .q.bad .opt span, .q.bad .text-in { border-color: var(--red); }
+  .submit { width: 100%; min-height: 56px; margin-top: 24px; border: 0; border-radius: 14px; background: var(--blue); color: #fff; font: inherit; font-size: 17px; font-weight: 700; cursor: pointer; }
+  .submit:disabled { opacity: .6; cursor: progress; }
+  .submit:focus-visible { outline: 3px solid var(--blue); outline-offset: 2px; }
+  .sv .foot a { color: var(--ink-2); }
+  .thanks { text-align: center; padding-top: 12vh; }
+  .thanks .mark { width: 72px; height: 72px; border-radius: 50%; background: var(--done-bg); color: var(--done-ink); display: grid; place-items: center; margin: 0 auto; }
+  .thanks .mark svg { width: 36px; height: 36px; }
+  .thanks .lead { margin: 0 auto; }
+
   @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
   @media (max-width: 420px) { .slot { width: 30px; } .progress { min-width: 72px; } .vote { font-size: 15px; } }
 </style>
 </head>
 <body>
-<main class="wrap">
+<main class="wrap" id="home">
   <div class="brand"><span class="dots"><i style="background:var(--blue)"></i><i style="background:var(--red)"></i><i style="background:var(--yellow)"></i><i style="background:var(--green)"></i></span>GDGoC KNU</div>
   <h1>Zero Demo Day<br>People's Choice 투표</h1>
   <p class="lead">2주 동안 만든 두 서비스를 직접 보고, 다시 써보고 싶은 서비스에 투표해주세요. 두 서비스를 모두 확인하면 투표 버튼이 열립니다.</p>
@@ -155,7 +198,22 @@
   <p class="foot">문의는 GDGoC KNU 운영진에게 남겨주세요. <button type="button" id="reset">확인 기록 초기화</button></p>
 </main>
 
-<div class="bar" role="region" aria-label="투표 진행 상황">
+<main class="wrap sv" id="survey" hidden aria-labelledby="sv-title">
+  <button type="button" class="back" data-go="home">← 서비스 다시 보기</button>
+  <h1 id="sv-title">최종 투표</h1>
+  <p class="lead">모든 문항에 답해야 제출할 수 있어요. 1분이면 끝나요.</p>
+  <form id="sv-form" novalidate></form>
+  <p class="foot">제출이 안 되면 <a id="sv-fallback" target="_blank" rel="noopener">구글 폼에서 직접 응답</a>해주세요.</p>
+</main>
+
+<main class="wrap sv thanks" id="thanks" hidden aria-labelledby="th-title">
+  <div class="mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div>
+  <h1 id="th-title">투표 완료!</h1>
+  <p class="lead" id="th-msg">소중한 한 표 고마워요.</p>
+  <p class="foot"><button type="button" class="back" data-go="home">서비스 다시 보기</button></p>
+</main>
+
+<div class="bar" id="bar" role="region" aria-label="투표 진행 상황">
   <div class="bar-in">
     <div class="progress">
       <div class="slots" id="slots"></div>
@@ -278,8 +336,8 @@ function render() {
   const wasReady = vote.classList.contains("ready");
   vote.classList.toggle("ready", ready);
   vote.setAttribute("aria-disabled", String(!ready));
-  vote.textContent = ready ? "최종 투표하러 가기" : "두 가지 서비스를 모두 체험한 후 투표해주세요";
-  if (ready && !wasReady && render.inited) { vote.classList.remove("pop"); void vote.offsetWidth; vote.classList.add("pop"); }
+  vote.textContent = state.submitted ? "투표 완료 ✓" : ready ? "최종 투표하러 가기" : "두 가지 서비스를 모두 체험한 후 투표해주세요";
+  if (ready && !wasReady && render.inited && !state.submitted) { vote.classList.remove("pop"); void vote.offsetWidth; vote.classList.add("pop"); }
   render.inited = true;
 }
 
@@ -309,20 +367,141 @@ grid.addEventListener("click", (e) => {
   render();
 });
 
+/* ---------- 화면 전환 ---------- */
+const views = { home: document.getElementById("home"), survey: document.getElementById("survey"), thanks: document.getElementById("thanks") };
+const bar = document.getElementById("bar");
+function show(name) {
+  for (const k in views) views[k].hidden = k !== name;
+  bar.hidden = name !== "home";
+  window.scrollTo(0, 0);
+}
+// 폰 뒤로가기로 설문 → 메인 복귀
+window.addEventListener("popstate", () => show("home"));
+document.addEventListener("click", (e) => {
+  const b = e.target.closest("[data-go]");
+  if (b) history.state && history.state.view ? history.back() : show(b.dataset.go);
+});
+
 vote.addEventListener("click", () => {
+  if (state.submitted) { history.pushState({ view: "thanks" }, ""); showThanks(); return; }
   if (!vote.classList.contains("ready")) {
     toast("두 가지 서비스를 모두 확인하면 투표할 수 있어요");
     return;
   }
-  if (!FORM_URL) {
-    toast("미리보기: 구글 폼 링크가 아직 연결되지 않았어요");
+  renderSurvey();
+  history.pushState({ view: "survey" }, "");
+  show("survey");
+});
+
+/* ---------- 설문 ---------- */
+const svForm = document.getElementById("sv-form");
+document.getElementById("sv-fallback").href = FORM_URL;
+const HOW = ["직접 써봤다", "영상만 봤다"];
+
+function radios(name, values, extraClass, labels) {
+  return `<div class="opts">${values.map((v, i) =>
+    `<label class="opt"${extraClass ? ` style="${extraClass[i]}"` : ""}><input type="radio" name="${name}" value="${esc(v)}"><span>${esc(labels ? labels[i] : v)}</span></label>`
+  ).join("")}</div>`;
+}
+function scale(name) {
+  return `${radios(name, ["1", "2", "3", "4", "5"])}<div class="scale-ends"><span>전혀 그렇지 않다</span><span>매우 그렇다</span></div>`;
+}
+let qSeq = 0;
+function q(title, inner, cls = "") {
+  const id = "qt" + (++qSeq);
+  return `<div class="q ${cls}" role="radiogroup" aria-labelledby="${id}"><p class="qt" id="${id}">${title}</p>${inner}<p class="err">답변을 선택해주세요</p></div>`;
+}
+
+function renderSurvey() {
+  if (!svForm.dataset.ready) {
+    const ordered = state.order.map(id => SERVICES.find(s => s.id === id));
+    svForm.innerHTML = `
+      <div class="sv-block">
+        <div class="q"><label class="qt" for="sv-sid">학번</label>
+          <input class="text-in" id="sv-sid" name="${FORM_ENTRIES.studentId}" inputmode="numeric" autocomplete="off" placeholder="예: 2024123456">
+          <p class="err">학번을 숫자로 입력해주세요</p></div>
+      </div>
+      ${ordered.map(s => `
+      <div class="sv-block svc" style="--accent:${s.color}">
+        <h2>${esc(s.name)}</h2>
+        <p class="ctx">지금까지는: ${esc(s.before)}</p>
+        ${q("이 서비스를 어떻게 확인했나요?", radios(s.form.how, HOW))}
+        ${q("이 문제를 최근 한 달 안에 직접 겪어봤나요?", radios(s.form.felt, ["예", "아니오"]))}
+        ${q("같은 상황이 생기면 이 서비스를 다시 쓸 것 같다.", scale(s.form.reuse), "scale")}
+        ${q("기존 방식보다 이 문제가 확실히 나아졌다.", scale(s.form.better), "scale")}
+      </div>`).join("")}
+      <div class="sv-block">
+        ${q("둘 중 하나만 남긴다면?", radios(FORM_ENTRIES.pick, ordered.map(s => s.form.pickLabel), ordered.map(s => `--accent:${s.color};--c:${s.color}`), ordered.map(s => s.name)), "pick")}
+        <div class="q"><label class="qt" for="sv-reason">그렇게 고른 이유를 한 줄로 남겨주세요</label>
+          <input class="text-in" id="sv-reason" name="${FORM_ENTRIES.reason}" autocomplete="off" maxlength="200">
+          <p class="err">이유를 한 줄 남겨주세요</p></div>
+      </div>
+      <button class="submit" type="submit">투표 제출하기</button>`;
+    svForm.dataset.ready = "1";
+  }
+  // 어떻게 확인했는지는 랜딩에서 누른 버튼으로 미리 체크 (아직 안 골랐을 때만)
+  for (const s of SERVICES) {
+    if (svForm.querySelector(`input[name="${s.form.how}"]:checked`)) continue;
+    const v = state.viewed[s.id] || {};
+    const val = v.try ? HOW[0] : v.video ? HOW[1] : "";
+    const el = val && svForm.querySelector(`input[name="${s.form.how}"][value="${val}"]`);
+    if (el) el.checked = true;
+  }
+}
+
+function checkQ(el) {
+  const inputs = el.querySelectorAll("input");
+  if (inputs[0].type === "radio") return [...inputs].some(i => i.checked);
+  const v = inputs[0].value.trim();
+  return inputs[0].id === "sv-sid" ? /^\d+$/.test(v) : v !== "";
+}
+svForm.addEventListener("input", (e) => {
+  const el = e.target.closest(".q");
+  if (el && el.classList.contains("bad") && checkQ(el)) el.classList.remove("bad");
+});
+
+svForm.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  let firstBad = null;
+  svForm.querySelectorAll(".q").forEach(el => {
+    const ok = checkQ(el);
+    el.classList.toggle("bad", !ok);
+    if (!ok && !firstBad) firstBad = el;
+  });
+  if (firstBad) {
+    firstBad.scrollIntoView({ behavior: "smooth", block: "center" });
+    toast("답하지 않은 문항이 있어요");
     return;
   }
-  const order = state.order.map(id => SERVICES.find(s => s.id === id).name).join(" → ");
-  let url = FORM_URL;
-  if (ORDER_ENTRY) url += (url.includes("?") ? "&" : "?") + "usp=pp_url&" + ORDER_ENTRY + "=" + encodeURIComponent(order);
-  window.open(url, "_blank", "noopener");
+
+  const body = new URLSearchParams();
+  for (const [k, v] of new FormData(svForm)) body.append(k, String(v).trim());
+  body.append("pageHistory", "0,1,2,3");  // 여러 페이지로 된 폼이라 필요
+
+  const btn = svForm.querySelector(".submit");
+  btn.disabled = true;
+  btn.textContent = "제출 중…";
+  try {
+    // 구글 폼은 응답을 읽을 수 없는(no-cors) 방식으로만 받음 → 네트워크 오류만 감지 가능
+    await fetch(FORM_URL.replace(/\/viewform.*$/, "/formResponse"), { method: "POST", mode: "no-cors", body });
+    const pick = SERVICES.find(s => s.form.pickLabel === body.get(FORM_ENTRIES.pick));
+    state.submitted = { at: Date.now(), pick: pick ? pick.id : "" };
+    save(state);
+    render();
+    showThanks();
+    history.replaceState({ view: "thanks" }, "");
+  } catch (err) {
+    btn.disabled = false;
+    btn.textContent = "투표 제출하기";
+    toast("제출하지 못했어요. 인터넷 연결을 확인하고 다시 눌러주세요");
+  }
 });
+
+function showThanks() {
+  const s = SERVICES.find(x => x.id === state.submitted.pick);
+  document.getElementById("th-msg").textContent = s ? `'${s.name}'에 투표했어요. 소중한 한 표 고마워요.` : "소중한 한 표 고마워요.";
+  show("thanks");
+}
 
 document.getElementById("reset").addEventListener("click", () => {
   state.viewed = {};
