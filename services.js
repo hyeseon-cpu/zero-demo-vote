@@ -10,7 +10,7 @@
    투표 페이지가 구글 폼에 직접 제출합니다. 폼 문항을 추가/삭제/수정하면
    entry 번호가 바뀌어 응답이 조용히 누락될 수 있으니, 폼을 고쳤다면
    반드시 테스트 제출 후 응답 시트에 들어오는지 확인하세요.
-   선택지 문구(예/아니오, 직접 써봤다 등)도 폼과 글자 하나까지 같아야 합니다.
+   선택지 문구(예/아니오, 직접 체험 등)도 폼과 글자 하나까지 같아야 합니다.
    ========================================================= */
 const FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLSc_u7RWYYy1E-CVuaOZYjR11x_BagLD4rp0z7AaMQV3uPs6sg/viewform";
 const FORM_ENTRIES = {
@@ -35,7 +35,7 @@ const SERVICES = [
     tryUrl: "",
     form: {
       pickLabel: "온라인 강의 자동재생",  // '둘 중 하나만 남긴다면?' 선택지 문구
-      how: "entry.1999191847",          // 이 서비스를 어떻게 확인했나요?
+      how: "entry.1999191847",          // 이 서비스를 어떻게 확인했나요? (체크박스)
       felt: "entry.2023958700",         // 최근 한 달 안에 직접 겪어봤나요?
       reuse: "entry.1752264830",        // 다시 쓸 것 같다 (1~5)
       better: "entry.889074920"         // 기존 방식보다 확실히 나아졌다 (1~5)
@@ -56,7 +56,7 @@ const SERVICES = [
     tryUrl: "",
     form: {
       pickLabel: "도서관",
-      how: "entry.1373647333",
+      how: "entry.1639756457",
       felt: "entry.1088831712",
       reuse: "entry.1785873018",
       better: "entry.1717739118"

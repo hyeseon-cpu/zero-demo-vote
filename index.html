@@ -160,6 +160,8 @@
   .opt input:checked + span { border-color: var(--accent, var(--blue)); background: color-mix(in srgb, var(--accent, var(--blue)) 12%, var(--surface)); font-weight: 700; }
   .opt input:focus-visible + span { outline: 3px solid var(--blue); outline-offset: 2px; }
   .scale .opt span { padding: 8px 0; }
+  .qt small { font-size: 13px; font-weight: 500; color: var(--ink-2); }
+  .multi .opt input:checked + span::before { content: "✓"; margin-right: 6px; }
   .scale-ends { display: flex; justify-content: space-between; font-size: 12px; color: var(--ink-2); margin-top: 6px; }
   .pick .opts { flex-direction: column; }
   .pick .opt span { justify-content: flex-start; padding: 12px 16px; min-height: 56px; font-size: 16px; }
@@ -396,11 +398,11 @@ vote.addEventListener("click", () => {
 /* ---------- 설문 ---------- */
 const svForm = document.getElementById("sv-form");
 document.getElementById("sv-fallback").href = FORM_URL;
-const HOW = ["직접 써봤다", "영상만 봤다"];
+const HOW = { try: "직접 체험", video: "시연 영상 시청" };  // 폼 체크박스 선택지와 똑같이
 
-function radios(name, values, extraClass, labels) {
+function radios(name, values, extraClass, labels, type = "radio") {
   return `<div class="opts">${values.map((v, i) =>
-    `<label class="opt"${extraClass ? ` style="${extraClass[i]}"` : ""}><input type="radio" name="${name}" value="${esc(v)}"><span>${esc(labels ? labels[i] : v)}</span></label>`
+    `<label class="opt"${extraClass ? ` style="${extraClass[i]}"` : ""}><input type="${type}" name="${name}" value="${esc(v)}"><span>${esc(labels ? labels[i] : v)}</span></label>`
   ).join("")}</div>`;
 }
 function scale(name) {
@@ -409,7 +411,7 @@ function scale(name) {
 let qSeq = 0;
 function q(title, inner, cls = "") {
   const id = "qt" + (++qSeq);
-  return `<div class="q ${cls}" role="radiogroup" aria-labelledby="${id}"><p class="qt" id="${id}">${title}</p>${inner}<p class="err">답변을 선택해주세요</p></div>`;
+  return `<div class="q ${cls}" role="${cls.includes("multi") ? "group" : "radiogroup"}" aria-labelledby="${id}"><p class="qt" id="${id}">${title}</p>${inner}<p class="err">답변을 선택해주세요</p></div>`;
 }
 
 function renderSurvey() {
@@ -425,7 +427,7 @@ function renderSurvey() {
       <div class="sv-block svc" style="--accent:${s.color}">
         <h2>${esc(s.name)}</h2>
         <p class="ctx">지금까지는: ${esc(s.before)}</p>
-        ${q("이 서비스를 어떻게 확인했나요?", radios(s.form.how, HOW))}
+        ${q("이 서비스를 어떻게 확인했나요? <small>(둘 다 선택 가능)</small>", radios(s.form.how, [HOW.try, HOW.video], null, null, "checkbox"), "multi")}
         ${q("이 문제를 최근 한 달 안에 직접 겪어봤나요?", radios(s.form.felt, ["예", "아니오"]))}
         ${q("같은 상황이 생기면 이 서비스를 다시 쓸 것 같다.", scale(s.form.reuse), "scale")}
         ${q("기존 방식보다 이 문제가 확실히 나아졌다.", scale(s.form.better), "scale")}
@@ -443,15 +445,16 @@ function renderSurvey() {
   for (const s of SERVICES) {
     if (svForm.querySelector(`input[name="${s.form.how}"]:checked`)) continue;
     const v = state.viewed[s.id] || {};
-    const val = v.try ? HOW[0] : v.video ? HOW[1] : "";
-    const el = val && svForm.querySelector(`input[name="${s.form.how}"][value="${val}"]`);
-    if (el) el.checked = true;
+    for (const kind of ["try", "video"]) {
+      const el = v[kind] && svForm.querySelector(`input[name="${s.form.how}"][value="${HOW[kind]}"]`);
+      if (el) el.checked = true;
+    }
   }
 }
 
 function checkQ(el) {
   const inputs = el.querySelectorAll("input");
-  if (inputs[0].type === "radio") return [...inputs].some(i => i.checked);
+  if (inputs[0].type === "radio" || inputs[0].type === "checkbox") return [...inputs].some(i => i.checked);
   const v = inputs[0].value.trim();
   return inputs[0].id === "sv-sid" ? /^\d+$/.test(v) : v !== "";
 }
