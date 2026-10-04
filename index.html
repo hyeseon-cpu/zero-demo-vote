@@ -150,6 +150,10 @@
   .sv-block > .q:first-child { padding-top: 0; }
   .qt { font-size: 15px; font-weight: 700; margin: 0 0 10px; display: block; }
   .qt::after { content: " *"; color: var(--red); }
+  .q.optional .qt::after { content: " (선택)"; color: var(--ink-2); font-weight: 500; font-size: 13px; }
+  .hint { font-size: 13px; color: var(--ink-2); margin: -4px 0 10px; }
+  textarea.text-in { min-height: 120px; resize: vertical; line-height: 1.6; }
+  .event { margin: 0 0 4px; padding: 12px 14px; border-radius: 12px; background: color-mix(in srgb, var(--yellow) 18%, var(--surface)); font-size: 14px; }
   .opts { display: flex; flex-wrap: wrap; gap: 8px; }
   .opt { position: relative; flex: 1 1 0; min-width: 0; }
   .opt input { position: absolute; opacity: 0; inset: 0; margin: 0; cursor: pointer; }
@@ -333,11 +337,11 @@ function render() {
 
   const n = ordered.filter(s => { const v = state.viewed[s.id] || {}; return v.video || v.try; }).length;
   count.textContent = `${n} / ${SERVICES.length} 확인`;
-  const ready = n === SERVICES.length;
+  const ready = n === SERVICES.length && !isClosed();
   const wasReady = vote.classList.contains("ready");
   vote.classList.toggle("ready", ready);
   vote.setAttribute("aria-disabled", String(!ready));
-  vote.textContent = state.submitted ? "투표 완료 ✓" : ready ? "최종 투표하러 가기" : "두 서비스를 모두 확인해주세요";
+  vote.textContent = state.submitted ? "투표 완료 ✓" : isClosed() ? "투표가 마감되었어요" : ready ? "최종 투표하러 가기" : "두 서비스를 모두 확인해주세요";
   if (ready && !wasReady && render.inited && !state.submitted) { vote.classList.remove("pop"); void vote.offsetWidth; vote.classList.add("pop"); }
   render.inited = true;
 }
@@ -383,8 +387,11 @@ document.addEventListener("click", (e) => {
   if (b) history.state && history.state.view ? history.back() : show(b.dataset.go);
 });
 
+const isClosed = () => Date.now() >= new Date(VOTE_DEADLINE).getTime();
+
 vote.addEventListener("click", () => {
   if (state.submitted) { history.pushState({ view: "thanks" }, ""); showThanks(); return; }
+  if (isClosed()) { toast("투표가 마감되었어요. 참여해주셔서 고마워요!"); return; }
   if (!vote.classList.contains("ready")) {
     toast("두 가지 서비스를 모두 확인하면 투표할 수 있어요");
     return;
@@ -437,6 +444,15 @@ function renderSurvey() {
           <input class="text-in" id="sv-reason" name="${FORM_ENTRIES.reason}" autocomplete="off" maxlength="200">
           <p class="err">이유를 한 줄 남겨주세요</p></div>
       </div>
+      <div class="sv-block">
+        <p class="event">☕ 아쉬운 점과 개선 아이디어를 성의껏 남겨주신 분들께 <b>컴포즈커피 아메리카노</b>를 보내드려요!</p>
+        <div class="q optional"><label class="qt" for="sv-feedback">두 서비스에 대한 아쉬운 점이나 개선 아이디어</label>
+          <textarea class="text-in" id="sv-feedback" name="${FORM_ENTRIES.feedback}" maxlength="2000" placeholder="예: 어떤 상황에서 불편했는지, 이런 기능이 있으면 좋겠다 등"></textarea></div>
+        <div class="q optional"><label class="qt" for="sv-phone">전화번호</label>
+          <p class="hint">이벤트 상품(기프티콘) 전달에만 사용해요.</p>
+          <input class="text-in" id="sv-phone" name="${FORM_ENTRIES.phone}" type="tel" inputmode="tel" autocomplete="tel" placeholder="010-0000-0000">
+          <p class="err">전화번호 형식을 확인해주세요 (예: 010-1234-5678)</p></div>
+      </div>
       <button class="submit" type="submit">투표 제출하기</button>`;
     svForm.dataset.ready = "1";
   }
@@ -452,10 +468,13 @@ function renderSurvey() {
 }
 
 function checkQ(el) {
-  const inputs = el.querySelectorAll("input");
+  const inputs = el.querySelectorAll("input, textarea");
   if (inputs[0].type === "radio" || inputs[0].type === "checkbox") return [...inputs].some(i => i.checked);
-  const v = inputs[0].value.trim();
-  return inputs[0].id === "sv-sid" ? /^\d+$/.test(v) : v !== "";
+  const field = el.querySelector("input, textarea");
+  const v = field.value.trim();
+  if (field.id === "sv-sid") return /^\d+$/.test(v);
+  if (field.id === "sv-phone") return v === "" || /^0\d{1,2}-?\d{3,4}-?\d{4}$/.test(v);
+  return el.classList.contains("optional") || v !== "";
 }
 svForm.addEventListener("input", (e) => {
   const el = e.target.closest(".q");
@@ -475,6 +494,8 @@ svForm.addEventListener("submit", async (e) => {
     toast("답하지 않은 문항이 있어요");
     return;
   }
+
+  if (isClosed()) { toast("투표가 마감되어 제출할 수 없어요"); return; }
 
   const body = new URLSearchParams();
   for (const [k, v] of new FormData(svForm)) body.append(k, String(v).trim());

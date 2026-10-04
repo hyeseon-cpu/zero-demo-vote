@@ -17,8 +17,13 @@ const FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLSc_u7RWYYy1E-CVuaOZYj
 const FORM_ENTRIES = {
   studentId: "entry.1608341470",   // 학번
   pick: "entry.1856759437",        // 둘 중 하나만 남긴다면?
-  reason: "entry.1121295101"       // 그렇게 고른 이유
+  reason: "entry.1121295101",      // 그렇게 고른 이유
+  feedback: "entry.1202539256",    // 아쉬운 점이나 개선 아이디어 (선택)
+  phone: "entry.1727087053"        // 전화번호 - 이벤트 상품 전달용 (선택)
 };
+
+// 투표 마감 시각 (한국 시간). 이후에는 투표 버튼이 닫힘
+const VOTE_DEADLINE = "2026-10-07T18:00:00+09:00";
 
 const SERVICES = [
   {
