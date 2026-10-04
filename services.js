@@ -3,6 +3,7 @@
    - videoUrl: 유튜브 일부공개 링크
    - tryUrl: 체험 링크
    - thumb: 대표 이미지 경로 (images/ 폴더 기준, 16:9, 1600×900 권장)
+   - id: 내부 식별자 (바꾸면 참가자들의 확인 기록이 초기화되니 그대로 두세요)
             파일이 없거나 비워두면 기본 일러스트가 표시됨
    - form: 구글 폼 문항과의 연결 정보 (아래 주의 참고)
 
@@ -22,17 +23,17 @@ const FORM_ENTRIES = {
 const SERVICES = [
   {
     id: "lecture",
-    name: "온라인 강의 자동재생",
-    team: "Zero 1팀",
-    color: "#4285F4", ink: "#1A73E8",
-    thumb: "images/lecture.png",
-    oneline: "다음 강의를 누르러 돌아올 필요 없이, 끝까지 알아서 이어 듣는 강의 도우미",
-    before: "강의 하나가 끝날 때마다 화면으로 돌아와 다음 차시를 직접 눌러야 함",
-    after: "한 번 켜두면 남은 차시가 순서대로 자동 재생되고 수강 완료까지 처리됨",
-    feature: "남은 강의 자동 이어재생",
-    mission: "샌드박스 강의 페이지에서 자동재생을 켜고 다음 차시로 넘어가는지 확인해보세요.",
-    videoUrl: "",
-    tryUrl: "",
+    name: "캐치캐치",
+    team: "이러다 놓치겠어, catch, catch",
+    color: "#2563EB", ink: "#1D4ED8",
+    thumb: "images/catchcatch.jpg",
+    oneline: "여러 온라인 강의를 자동으로 연속 재생하는 학습 보조 도구",
+    before: "강의가 끝날 때마다 직접 다음 강의를 찾아 하나하나 재생해야 함",
+    after: "2시간의 온라인 수업을 귀찮게 하는 클릭 10번이, 30초짜리 플리 생성으로 단축!",
+    feature: "핸즈프리 온라인 강의 자동 재생",
+    mission: "데모 사이트에서 직접 강의 두 개를 재생목록에 넣고, 자동 재생 해보기!",
+    videoUrl: "https://youtu.be/_obet5gwXac",
+    tryUrl: "https://catchcatch.ai.studio",
     form: {
       pickLabel: "온라인 강의 자동재생",  // '둘 중 하나만 남긴다면?' 선택지 문구
       how: "entry.1999191847",          // 이 서비스를 어떻게 확인했나요? (체크박스)
@@ -43,17 +44,17 @@ const SERVICES = [
   },
   {
     id: "library",
-    name: "도서관 빈자리 알림",
-    team: "Zero 2팀",
-    color: "#34A853", ink: "#188038",
-    thumb: "images/library.png",
-    oneline: "열람실을 돌아다니지 않아도, 자리가 나면 먼저 알려주는 알림 서비스",
-    before: "빈자리를 찾으러 열람실을 직접 돌아다니거나 좌석 현황을 계속 새로고침함",
-    after: "원하는 열람실을 등록해두면 자리가 날 때 알림을 받고 바로 이동함",
-    feature: "열람실 빈자리 알림 등록",
-    mission: "알림 받을 열람실을 등록하고, 빈자리 알림을 받아보세요. (가상 데이터로 작동)",
-    videoUrl: "",
-    tryUrl: "",
+    name: "Liverary",
+    team: "Liverary",
+    color: "#5B5BD6", ink: "#4747C2",
+    thumb: "images/liverary.jpg",
+    oneline: "도서관 자유석을 확인하고 공부 시간을 기록하는 서비스",
+    before: "도서관 안을 돌아다니며 빈자리와 콘센트 있는 자리를 직접 찾아야 함",
+    after: "배치도에서 빈자리와 콘센트 위치를 확인하고, 공부 시간도 함께 기록",
+    feature: "자유석 위치·빈자리 확인",
+    mission: "콘센트가 있는 빈자리를 찾아 이용해 보고, 종료 후 공부 기록을 확인해보기",
+    videoUrl: "https://youtu.be/kJTjpnbBTJo",
+    tryUrl: "https://liverary-demo.pages.dev/",
     form: {
       pickLabel: "도서관",
       how: "entry.1639756457",

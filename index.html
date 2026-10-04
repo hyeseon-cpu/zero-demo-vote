@@ -74,10 +74,10 @@
   .body { padding: 22px 22px 24px; display: flex; flex-direction: column; gap: 16px; flex: 1; }
   .top { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
   .name { font-size: 22px; font-weight: 900; margin: 0; letter-spacing: -0.01em; line-height: 1.3; }
-  .team { font-size: 13px; color: var(--ink-2); margin: 2px 0 0; }
+  .team { font-size: 13px; color: var(--ink-2); margin: 6px 0 0; }
   .chip { flex-shrink: 0; font-size: 12px; font-weight: 700; padding: 5px 10px; border-radius: 999px; background: var(--disabled-bg); color: var(--disabled-ink); white-space: nowrap; }
   .card.done .chip { background: var(--done-bg); color: var(--done-ink); }
-  .oneline { font-size: 15px; margin: 0; }
+  .oneline { font-size: 15px; font-weight: 500; margin: 4px 0 0; line-height: 1.5; }
 
   .ba { display: grid; grid-template-columns: 1fr; border: 1px solid var(--line); border-radius: 14px; overflow: hidden; }
   .ba > div { padding: 12px 14px; }
@@ -221,7 +221,7 @@
       <div class="slots" id="slots"></div>
       <span class="count" id="count">0 / 2 확인</span>
     </div>
-    <button class="vote" id="vote" type="button" aria-disabled="true">두 가지 서비스를 모두 체험한 후 투표해주세요</button>
+    <button class="vote" id="vote" type="button" aria-disabled="true">두 서비스를 모두 확인해주세요</button>
   </div>
 </div>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
@@ -309,10 +309,9 @@ function render() {
       <div class="thumb">${thumb}</div>
       <div class="body">
         <div class="top">
-          <div><h2 class="name" id="n-${s.id}">${esc(s.name)}</h2><p class="team">${esc(s.team)}</p></div>
+          <div><h2 class="name" id="n-${s.id}">${esc(s.name)}</h2><p class="oneline">${esc(s.oneline)}</p><p class="team">팀 ${esc(s.team)}</p></div>
           <span class="chip">${done ? "확인 완료" : "아직 안 봄"}</span>
         </div>
-        <p class="oneline">${esc(s.oneline)}</p>
         <dl class="ba">
           <div><dt>지금까지는</dt><dd>${esc(s.before)}</dd></div>
           <div><dt>이 서비스를 쓰면</dt><dd>${esc(s.after)}</dd></div>
@@ -338,7 +337,7 @@ function render() {
   const wasReady = vote.classList.contains("ready");
   vote.classList.toggle("ready", ready);
   vote.setAttribute("aria-disabled", String(!ready));
-  vote.textContent = state.submitted ? "투표 완료 ✓" : ready ? "최종 투표하러 가기" : "두 가지 서비스를 모두 체험한 후 투표해주세요";
+  vote.textContent = state.submitted ? "투표 완료 ✓" : ready ? "최종 투표하러 가기" : "두 서비스를 모두 확인해주세요";
   if (ready && !wasReady && render.inited && !state.submitted) { vote.classList.remove("pop"); void vote.offsetWidth; vote.classList.add("pop"); }
   render.inited = true;
 }
@@ -426,7 +425,7 @@ function renderSurvey() {
       ${ordered.map(s => `
       <div class="sv-block svc" style="--accent:${s.color}">
         <h2>${esc(s.name)}</h2>
-        <p class="ctx">지금까지는: ${esc(s.before)}</p>
+        <p class="ctx">${esc(s.oneline)}<br>지금까지는: ${esc(s.before)}</p>
         ${q("이 서비스를 어떻게 확인했나요? <small>(둘 다 선택 가능)</small>", radios(s.form.how, [HOW.try, HOW.video], null, null, "checkbox"), "multi")}
         ${q("이 문제를 최근 한 달 안에 직접 겪어봤나요?", radios(s.form.felt, ["예", "아니오"]))}
         ${q("같은 상황이 생기면 이 서비스를 다시 쓸 것 같다.", scale(s.form.reuse), "scale")}
